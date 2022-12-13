@@ -1,0 +1,36 @@
+{
+  "name": "twitterstream",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon app.js"
+  },
+  "author": "phillimo",
+  "license": "ISC",
+  "dependencies": {
+    "aws-sdk": "^2.1249.0",
+    "bcrypt": "^5.1.0",
+    "body-parser": "^1.20.1",
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.3",
+    "express": "^4.18.2",
+    "fs": "^0.0.1-security",
+    "http": "^0.0.1-security",
+    "jsonwebtoken": "^8.5.1",
+    "multer": "^1.4.5-lts.1",
+    "needle": "^3.2.0",
+    "nodemon": "^2.0.20",
+    "path": "^0.12.7",
+    "pg": "^8.8.0",
+    "pg-hstore": "^2.3.4",
+    "sequelize": "^6.25.3",
+    "sequelize-cli": "^6.4.1",
+    "socket.io": "^4.5.4",
+    "util": "^0.12.5"
+  },
+  "devDependencies": {
+    "sequelize-cli": "^6.5.2"
+  }
+}
