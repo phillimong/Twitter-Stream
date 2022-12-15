@@ -19,7 +19,10 @@ const streamURL =
   "https://api.twitter.com/2/tweets/search/stream?tweet.fields=public_metrics&user.fields=id,name,username,profile_image_url&expansions=author_id,attachments.media_keys&media.fields=url";
 
 const rules = [
-  { value: "@ziara_outdoors #biking"},
+  { value: "@ziara_outdoors", tag: "mentions" },
+  { value: "@ziara_outdoors #biking", tag: "biking" },
+  { value: "@ziara_outdoors #gamedrive", tag: "gamedrive" },
+  { value: "@ziara_outdoors #safari", tag: "safari" },
 ];
 
 // Get stream rules
