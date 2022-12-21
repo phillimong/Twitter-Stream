@@ -16,7 +16,7 @@ const TOKEN = process.env.TWITTER_BEARER_TOKEN;
 
 const rulesURL = "https://api.twitter.com/2/tweets/search/stream/rules";
 const streamURL =
-  "https://api.twitter.com/2/tweets/search/stream?tweet.fields=public_metrics,conversation_id,created_at,in_reply_to_user_id,referenced_tweets&user.fields=id,name,username,profile_image_url&expansions=author_id,attachments.media_keys,in_reply_to_user_id,referenced_tweets.id&media.fields=url";
+  "https://api.twitter.com/2/tweets/search/stream?tweet.fields=public_metrics,conversation_id,created_at,in_reply_to_user_id,referenced_tweets,entities&user.fields=id,name,username,profile_image_url&expansions=author_id,attachments.media_keys,in_reply_to_user_id,referenced_tweets.id&media.fields=url";
 
 const rules = [
   { value: "@ziara_outdoors", tag: "mentions" },
