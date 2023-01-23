@@ -5,7 +5,7 @@ const needle = require("needle");
 const http = require("http");
 const path = require("path");
 const socketIo = require("socket.io");
-// const models = require("./models");
+const models = require("./models");
 const tweet = require("./models/tweet");
 
 require("dotenv").config();
@@ -93,7 +93,7 @@ function streamTweets(socket) {
       
       const {users, media} = includes;
 
-      const media_dets = media.map((media) => ({type: media.type, url: media.url}))
+      const media_urls = media.map((media) => ({url: media.url}))
     
       console.log("Conversation ID : "+conversation_id)
       console.log("//////////")
@@ -103,7 +103,7 @@ function streamTweets(socket) {
       console.log("////////")
       console.log("Created At : "+created_at);
       console.log("////////")
-      console.log(media_dets)
+      console.log(media_urls)
 
       const user = users[0];
 

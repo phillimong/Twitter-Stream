@@ -20,7 +20,7 @@ module.exports = {
       media_dets: {
         type: Sequelize.ARRAY
       },
-      tag: {
+      tag:{
         type: Sequelize.STRING
       },
       user_name: {
