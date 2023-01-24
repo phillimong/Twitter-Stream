@@ -21,7 +21,7 @@ module.exports = (sequelize, DataTypes) => {
     text: DataTypes.STRING,
     conversation_id: DataTypes.STRING,
     created_at: DataTypes.DATE,
-    media_dets: DataTypes.ARRAY(DataTypes.ARRAY),
+    media_dets: DataTypes.JSONB,
     tag: DataTypes.STRING,
     user_name: DataTypes.STRING,
     user_image_url: DataTypes.STRING,

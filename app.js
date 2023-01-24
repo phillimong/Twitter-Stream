@@ -140,14 +140,14 @@ io.on("connection", async () => {
 
 
 //database sync
-// models.sequelize
-//   .sync({ update: true })
-//   .then(function () {
-//     console.log("Database OK");
-//   })
-//   .catch(function (err) {
-//     console.log(err, `${err}`);
-//   });
+models.sequelize
+  .sync({ update: true })
+  .then(function () {
+    console.log("Database OK");
+  })
+  .catch(function (err) {
+    console.log(err, `${err}`);
+  });
 
 server.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);

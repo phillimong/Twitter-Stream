@@ -1,21 +1,31 @@
 version: "3.8"
-
 services:
-  postgres:
-    image: postgres:13.1
-    restart: always
+  node_backend:
+    container_name: twitter-stream
+    image: twitter-stream:0.0.1
+    build:
+      context: .
+    ports:
+      - "4000:4000"
     environment:
-      POSTRGRES_USER: postgres
-      POSTGRES_PASSWORD: example
-      DATABASE_NAME: ziara_db
-      DATABASE_USERNAME: ziara 
-      DATABASE_USERPASS: example
-      
+      - SERVER_PORT=4000
+      - PGDATABASE=ziara_db
+      - PGUSER=ziara
+      - PGPASSWORD=12345
+      - PGHOST=node_db
+      - NODE_ENV = 'development'
+    depends_on:
+      - node_db
+  node_db:
+    container_name: node_db
+    image: "postgres:12"
     ports:
-      - 5432:5432
-
-  adminer:
-    image: adminer
-    restart: always
-    ports:
-      - 8080:8080
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=ziara
+      - POSTGRES_PASSWORD=12345
+      - POSTGRES_DB=ziara_db
+    volumes:
+      - nps_data:/var/lib/postgresql/data
+volumes:
+  nps_data: {}
