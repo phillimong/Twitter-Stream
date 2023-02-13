@@ -23,6 +23,8 @@ const rules = [
   { value: "@ziara_outdoors #biking", tag: "biking" },
   { value: "@ziara_outdoors #gamedrive", tag: "gamedrive" },
   { value: "@ziara_outdoors #safari", tag: "safari" },
+  { value: "@ziara_outdoors #camping", tag: "camping" },
+  { value: "@ziara_outdoors #fishing", tag: "fishing" },
 ];
 
 // Get stream rules
