@@ -5,7 +5,8 @@ const needle = require("needle");
 const http = require("http");
 const path = require("path");
 const socketIo = require("socket.io");
-
+const Tweet = require('./models/tweet');
+const models = require("./models");
 require("dotenv").config();
 
 const app = express();
@@ -16,7 +17,7 @@ const TOKEN = process.env.TWITTER_BEARER_TOKEN;
 
 const rulesURL = "https://api.twitter.com/2/tweets/search/stream/rules";
 const streamURL =
-  "https://api.twitter.com/2/tweets/search/stream?tweet.fields=public_metrics,conversation_id,created_at,in_reply_to_user_id,referenced_tweets&user.fields=id,name,username,profile_image_url&expansions=author_id,attachments.media_keys,in_reply_to_user_id,referenced_tweets.id&media.fields=url";
+  "https://api.twitter.com/2/tweets/search/stream?tweet.fields=public_metrics,conversation_id,created_at,in_reply_to_user_id,referenced_tweets,entities&user.fields=id,name,username,profile_image_url&expansions=author_id,attachments.media_keys,in_reply_to_user_id,referenced_tweets.id&media.fields=url";
 
 const rules = [
   { value: "@ziara_outdoors", tag: "mentions" },
@@ -78,17 +79,50 @@ async function deleteRules(rules) {
   return response.body;
 }
 
+function storeTweet(){
+  try {
+    
+  } catch (error) {}
+  
+}
+
 function streamTweets(socket) {
   const stream = needle.get(streamURL, {
     headers: {
       Authorization: `Bearer ${TOKEN}`,
     },
   });
-  stream.on("data", (data) => {
+  stream.on("data", (obj) => {
     try {
-      const json = JSON.parse(data);
-      socket.emit("tweet", json);
-      console.log(json);
+      const tweet_obj = JSON.parse(obj);
+      const { data, includes, matching_rules } = tweet_obj;
+      socket.emit("tweet", tweet_obj);
+      console.log(data, includes, matching_rules);
+      const { entities, conversation_id, created_at, id, text, referenced_tweets } = data;
+      const {hashtags} = entities; 
+      const { users, media } = includes;
+      const media_dets = media?.map((media) => ({ url: media.url }));
+      const tweet_owner = users.shift();
+      const mentioned_users = users?.map((user)=>({user_name: user.user_name}));
+      const user_name = tweet_owner.name;
+      const user_image_url = tweet_owner.profile_image_url;
+      const user_username = tweet_owner.username;
+      const tags = hashtags?.map((tag) => ({ tag: tag.tag }));
+      console.log(tags);
+    
+      Tweet.create({
+        id: id,
+        text: text,
+        conversation_id: conversation_id,
+        created_at: created_at,
+        media_dets: media_dets,
+        hashtags: tags,
+        user_name: user_name,
+        user_username: user_username,
+        user_image_url: user_image_url,
+        referenced_tweets: referenced_tweets,
+        mentioned_users: mentioned_users,
+      });
     } catch (error) {}
   });
 }
@@ -110,6 +144,17 @@ io.on("connection", async () => {
   streamTweets(io);
 });
 
+
+models.sequelize
+  .sync({ update: true })
+  .then(function () {
+    console.log("Database OK");
+  })
+  .catch(function (err) {
+    console.log(err, `${err}`);
+  });
+
 server.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
+  
 });
