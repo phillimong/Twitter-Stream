@@ -5,7 +5,7 @@ const needle = require("needle");
 const http = require("http");
 const path = require("path");
 const socketIo = require("socket.io");
-const Tweet = require('./models/tweet');
+const Tweet = require("./models").Tweet;
 const models = require("./models");
 require("dotenv").config();
 
@@ -79,12 +79,27 @@ async function deleteRules(rules) {
   return response.body;
 }
 
-function storeTweet(){
+function storeTweet(id, text, conversation_id,created_at, media_dets,tags,user_name,user_username, user_image_url, referenced_tweets, mentioned_users){
   try {
-    
-  } catch (error) {}
-  
+    Tweet.create({
+      id:id,
+      text:text,
+      conversation_id:conversation_id,
+      created_at:created_at,
+      media_dets:media_dets,
+      hashtags:tags,
+      user_name:user_name,
+      user_username:user_username,
+      user_image_url:user_image_url,
+      referenced_tweets:referenced_tweets,
+      mentioned_users:mentioned_users,
+    });
+  } catch (error) {
+    console.log(error);
+  }
 }
+
+
 
 function streamTweets(socket) {
   const stream = needle.get(streamURL, {
@@ -99,30 +114,18 @@ function streamTweets(socket) {
       socket.emit("tweet", tweet_obj);
       console.log(data, includes, matching_rules);
       const { entities, conversation_id, created_at, id, text, referenced_tweets } = data;
-      const {hashtags} = entities; 
+      const {hashtags, mentions} = entities; 
       const { users, media } = includes;
       const media_dets = media?.map((media) => ({ url: media.url }));
       const tweet_owner = users.shift();
-      const mentioned_users = users?.map((user)=>({user_name: user.user_name}));
+      const mentioned_users = users.map((user)=>({username: user.username}));
       const user_name = tweet_owner.name;
       const user_image_url = tweet_owner.profile_image_url;
       const user_username = tweet_owner.username;
       const tags = hashtags?.map((tag) => ({ tag: tag.tag }));
-      console.log(tags);
-    
-      Tweet.create({
-        id: id,
-        text: text,
-        conversation_id: conversation_id,
-        created_at: created_at,
-        media_dets: media_dets,
-        hashtags: tags,
-        user_name: user_name,
-        user_username: user_username,
-        user_image_url: user_image_url,
-        referenced_tweets: referenced_tweets,
-        mentioned_users: mentioned_users,
-      });
+
+      storeTweet(id,text, conversation_id,created_at, media_dets,tags,user_name,user_username, user_image_url, referenced_tweets, mentioned_users);
+
     } catch (error) {}
   });
 }
