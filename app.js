@@ -19,6 +19,9 @@ const rulesURL = "https://api.twitter.com/2/tweets/search/stream/rules";
 const streamURL =
   "https://api.twitter.com/2/tweets/search/stream?tweet.fields=public_metrics,conversation_id,created_at,in_reply_to_user_id,referenced_tweets,entities&user.fields=id,name,username,profile_image_url&expansions=author_id,attachments.media_keys,in_reply_to_user_id,referenced_tweets.id&media.fields=url";
 
+
+
+
 const rules = [
   { value: "@ziara_outdoors", tag: "mentions" },
   { value: "@ziara_outdoors #biking", tag: "biking" },
@@ -26,6 +29,7 @@ const rules = [
   { value: "@ziara_outdoors #safari", tag: "safari" },
   { value: "@ziara_outdoors #camping", tag: "camping" },
   { value: "@ziara_outdoors #fishing", tag: "fishing" },
+  { value: "@ziara_outdoors #gettweetdets", tag: "getfirstweet"}
 ];
 
 // Get stream rules
@@ -76,10 +80,33 @@ async function deleteRules(rules) {
     },
   });
 
+
+
   return response.body;
 }
 
-function storeTweet(id, text, conversation_id,created_at, media_dets,tags,user_name,user_username, user_image_url, referenced_tweets, mentioned_users){
+// Set search tweet
+async function searchStoreTweet(search_id) {
+  
+  const searchTweetURL = `https://api.twitter.com/2/tweets/${search_id}?tweet.fields=public_metrics,conversation_id,created_at,in_reply_to_user_id,referenced_tweets,entities&user.fields=id,name,username,profile_image_url&expansions=author_id,attachments.media_keys,in_reply_to_user_id,referenced_tweets.id&media.fields=url`;
+  
+  const response = await needle("get", searchTweetURL, {
+    headers: {
+      "content-type": "application/json",
+      Authorization: `Bearer ${TOKEN}`,
+    },
+  });
+ const {data, includes} = response.body;
+ const { entities, conversation_id, created_at, id, text, referenced_tweets } = data;
+ const {hashtags} = entities; 
+ const { users, media } = includes;
+ const media_dets = media?.map((media) => ({ url: media.url }));
+ const tweet_owner = users.shift();
+ const mentioned_users = users.map((user)=>({username: user.username}));
+ const user_name = tweet_owner.name;
+ const user_image_url = tweet_owner.profile_image_url;
+ const user_username = tweet_owner.username;
+ const tags = hashtags?.map((tag) => ({ tag: tag.tag }));
   try {
     Tweet.create({
       id:id,
@@ -97,6 +124,36 @@ function storeTweet(id, text, conversation_id,created_at, media_dets,tags,user_n
   } catch (error) {
     console.log(error);
   }
+
+}
+
+function storeTweet(id, text, conversation_id,created_at, media_dets,tags,user_name,user_username, user_image_url, referenced_tweets, mentioned_users){
+
+  const search_id = conversation_id
+
+  const last = tags.at(-1);
+  const {tag} = last
+  if(tag == "gettweetdets"){
+    searchStoreTweet(search_id)
+  } else{
+    try {
+      Tweet.create({
+        id:id,
+        text:text,
+        conversation_id:conversation_id,
+        created_at:created_at,
+        media_dets:media_dets,
+        hashtags:tags,
+        user_name:user_name,
+        user_username:user_username,
+        user_image_url:user_image_url,
+        referenced_tweets:referenced_tweets,
+        mentioned_users:mentioned_users,
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  }
 }
 
 
@@ -107,14 +164,14 @@ function streamTweets(socket) {
       Authorization: `Bearer ${TOKEN}`,
     },
   });
+
   stream.on("data", (obj) => {
     try {
       const tweet_obj = JSON.parse(obj);
-      const { data, includes, matching_rules } = tweet_obj;
+      const {data, includes} = tweet_obj;
       socket.emit("tweet", tweet_obj);
-      console.log(data, includes, matching_rules);
       const { entities, conversation_id, created_at, id, text, referenced_tweets } = data;
-      const {hashtags, mentions} = entities; 
+      const {hashtags} = entities; 
       const { users, media } = includes;
       const media_dets = media?.map((media) => ({ url: media.url }));
       const tweet_owner = users.shift();
